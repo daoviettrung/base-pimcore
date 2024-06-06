@@ -1,8 +1,4 @@
 services:
-    redis:
-        image: redis:alpine
-        command: [ redis-server, --maxmemory 128mb, --maxmemory-policy volatile-lru, --save "" ]
-
     db:
         image: mariadb:10.11
         working_dir: /application
@@ -35,7 +31,7 @@ services:
             - php
 
     php:
-        #user: '1000:1000' # set to your uid:gid
+        user: '1000:1000' # set to your uid:gid
         image: pimcore/pimcore:php8.2-debug-latest
         environment:
             COMPOSER_HOME: /var/www/html
@@ -63,33 +59,5 @@ services:
             - .:/var/www/html
             - ./.docker/supervisord.conf:/etc/supervisor/conf.d/pimcore.conf:ro
 
-    # The following two services are used for testing.
-    # We restrict these services to the test profile only, so we don't spin them up with every `docker compose up`.
-    # See: https://docs.docker.com/compose/profiles/
-    test-db:
-        profiles: [ 'test' ]
-        extends: db
-        volumes:
-            - pimcore-test-database:/var/lib/mysql
-
-    test-php:
-        profiles: [ 'test' ]
-        extends: php
-        environment:
-            APP_ENV: test
-            PIMCORE_TEST_DB_DSN: ${PIMCORE_TEST_DB_DSN:-mysql://pimcore:pimcore@test-db/pimcore}
-            PIMCORE_INSTALL_ADMIN_USERNAME: pimcore
-            PIMCORE_INSTALL_ADMIN_PASSWORD: pimcore
-            PIMCORE_INSTALL_MYSQL_HOST_SOCKET: test-db
-        depends_on:
-            test-db:
-                condition: service_healthy
-        volumes:
-            - pimcore-test-var:/var/www/html/var
-            - pimcore-test-public-var:/var/www/html/public/var
-
 volumes:
     pimcore-database:
-    pimcore-test-database:
-    pimcore-test-var:
-    pimcore-test-public-var:

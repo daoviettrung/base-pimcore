@@ -59,6 +59,10 @@ services:
         resource: '../src/Command/*'
         tags: [ 'console.command' ]
 
+    App\Service\Auth\JwtService:
+        arguments:
+            $secretKey: '%env(JWT_SECRET)%'
+
 
 
     # Example custom templating helper
