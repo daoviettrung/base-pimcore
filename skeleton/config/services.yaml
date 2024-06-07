@@ -62,6 +62,12 @@ services:
     App\Service\Auth\JwtService:
         arguments:
             $secretKey: '%env(JWT_SECRET)%'
+    
+    App\Middleware\JWTMiddleware:
+        arguments:
+            $jwtSecret: '%env(JWT_SECRET)%'
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
 
 
 

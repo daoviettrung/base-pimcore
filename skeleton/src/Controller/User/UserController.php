@@ -8,9 +8,12 @@ use Pimcore\Model\DataObject\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Symfony\Component\Security\Core\Security;
+use App\Traits\AuthenticatedUserTrait as AuthTrait;
 class UserController extends FrontendController
 {
+    use AuthTrait;
+
     private JwtService $jwtService;
 
     public function __construct(JwtService $jwtService)
@@ -34,11 +37,14 @@ class UserController extends FrontendController
     }
 
     /**
-     * @Route("/api/user/test", name="api_secure_endpoint", methods={"GET"})
+     * @Route("/api/user/list", name="api_secure_endpoint", methods={"GET"})
      */
     public function secureEndpoint(Request $request): JsonResponse
     {
-        return new JsonResponse(['msg' => 'Hello']);
+        $jwt = $request->query->all();
+        $user = $this->getUserObject($request);
+        
+        return new JsonResponse(['msg' => 'Hello11']);
     }
 
     private function authenticate(Request $request)
@@ -46,6 +52,7 @@ class UserController extends FrontendController
         $phone = $request->request->get('phone');
         $password = $request->request->get('password');
         $user = User::getByPhone($phone, 1);
+        
         if (!empty($user) && $user instanceof User) {
             if (password_verify($password, $user->getPassword())) {
                 return $user;
